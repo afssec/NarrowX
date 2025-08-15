@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8" />
+  <title>NarrowX — About</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" href="images/icon16.png" />
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600&family=Inter:wght@400;600&display=swap');
+
+    :root{
+      --bg-start:#0d0d0d;
+      --bg-end:#1a1a1a;
+      --panel:#0f0f10;
+      --panel-2:#141416;
+      --border:#2a2a2e;
+      --text:#e6e6e6;
+      --muted:#bdbdbd;
+      --accent:#FFD700;
+      --accent-2:#C0C0C0;
+      --success:#22c55e;
+      --radius:14px;
+      --shadow:0 10px 30px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.03);
+      --avatar:128px;
+    }
+
+    *{ box-sizing: border-box; }
+    html,body{
+      height: 100%;
+      margin:0;
+      color:var(--text);
+      background: radial-gradient(1200px 800px at 20% -10%, #111 0%, #0d0d0d 30%, #0b0b0b 60%, #080808 100%), linear-gradient(120deg, var(--bg-start), var(--bg-end));
+      font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+    }
+
+    .container{
+      max-width: 980px;
+      margin: 32px auto 60px;
+      padding: 0 16px;
+    }
+
+    .hero{
+      display:flex;
+      align-items:center;
+      gap:20px;
+      padding:18px 20px;
+      background: linear-gradient(180deg, rgba(255,215,0,0.05), rgba(255,215,0,0.02));
+      border:1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+    .logo{
+      width:72px;height:72px;border-radius:14px;
+      box-shadow: 0 0 26px rgba(255,215,0,0.25);
+    }
+    .brand{
+      display:flex;flex-direction:column;gap:6px;
+    }
+    .title{
+      font-family:'Orbitron', sans-serif;
+      margin:0;
+      letter-spacing:.5px;
+      font-weight:600;
+      font-size:28px;
+      color:var(--accent);
+      text-shadow: 0 0 18px rgba(255,215,0,0.25);
+    }
+    .tagline{
+      margin:0;
+      color:var(--accent-2);
+      font-size:13px;
+    }
+    .version-badge{
+      margin-left:auto;
+      background:linear-gradient(90deg, #1a1a1a, #0f0f0f);
+      border:1px solid var(--border);
+      color:var(--muted);
+      padding:8px 12px;
+      border-radius:12px;
+      font-size:12px;
+      display:flex;align-items:center;gap:8px;
+    }
+    .version-dot{width:8px;height:8px;border-radius:50%;background:var(--success);box-shadow:0 0 12px rgba(34,197,94,.5);}
+
+    .grid{
+      margin-top:18px;
+      display:grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap:16px;
+    }
+    .card{
+      grid-column: span 6;
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border:1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding:18px;
+    }
+    @media (max-width: 900px){
+      .card{ grid-column: span 12; }
+    }
+
+    .card h2{
+      margin:0 0 10px;
+      font-family:'Orbitron', sans-serif;
+      font-size:18px;
+      color:var(--accent);
+      letter-spacing:.3px;
+    }
+    .muted{ color:var(--muted); font-size:13px; margin:0 0 14px; }
+
+    .features{ list-style:none; margin:0; padding:0; display:grid; gap:10px;}
+    .feature{
+      display:flex; align-items:flex-start; gap:10px; background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.005));
+      border:1px dashed rgba(255,255,255,0.06);
+      padding:10px 12px; border-radius:12px;
+    }
+    .feature .icon{ font-size:18px; width:22px; text-align:center; filter: drop-shadow(0 0 6px rgba(255,215,0,0.25)); }
+    .feature .text{ font-size:13px; color:var(--text); }
+
+    .steps{ counter-reset: step; list-style:none; margin:0; padding:0; display:grid; gap:12px; }
+    .steps li{
+      position:relative; padding:10px 12px 10px 40px; background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border:1px solid var(--border); border-radius:12px; color:var(--text); font-size:13px;
+    }
+    .steps li::before{
+      counter-increment: step;
+      content: counter(step);
+      position:absolute; left:10px; top:50%; transform:translateY(-50%);
+      width:22px; height:22px; border-radius:50%;
+      background:linear-gradient(180deg, var(--accent), #f1c40f);
+      color:#111; font-weight:800; font-size:12px; display:flex; align-items:center; justify-content:center;
+      box-shadow: 0 0 14px rgba(255,215,0,0.35);
+    }
+
+    .badges{ display:flex; gap:10px; flex-wrap:wrap; margin-top:10px;}
+    .badge{
+      font-size:12px; color:#111; background:linear-gradient(90deg, var(--accent), #f1c40f);
+      padding:6px 10px; border-radius:999px; font-weight:700; letter-spacing:.3px;
+      box-shadow:0 4px 14px rgba(255,215,0,0.25);
+    }
+
+    .author{
+      margin-top:18px;
+      display:flex; align-items:center; gap:16px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border:1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); padding:16px;
+    }
+    .author-pic{
+      width:var(--avatar);
+      height:var(--avatar);
+      border-radius:16px;
+      object-fit:cover;
+      border:1px solid var(--border);
+      box-shadow:0 0 22px rgba(255,215,0,0.2);
+      cursor: zoom-in;
+      transition: transform .2s ease, box-shadow .2s ease;
+    }
+    .author-pic:hover{
+      transform: translateZ(0) scale(1.02);
+      box-shadow:0 0 26px rgba(255,215,0,0.28);
+    }
+    .author h3{ margin:0; font-family:'Orbitron', sans-serif; font-size:18px; color:var(--accent); }
+    .author .role{ margin:6px 0 0; color:var(--muted); font-size:13px; }
+    .links{ margin-top:8px; display:flex; gap:10px; flex-wrap:wrap; }
+    .links a{
+      text-decoration:none; color:#111; background:linear-gradient(90deg, var(--accent), #f1c40f);
+      padding:6px 10px; border-radius:10px; font-size:12px; font-weight:700;
+      box-shadow:0 6px 16px rgba(255,215,0,0.25);
+    }
+
+    @media (max-width: 520px){
+      :root{ --avatar:100px; }
+      .author{ gap:12px; }
+    }
+
+    .modal{
+      position: fixed; inset: 0;
+      display:none;
+      align-items:center; justify-content:center;
+      background: rgba(0,0,0,.65);
+      backdrop-filter: blur(2px);
+      z-index: 9999;
+    }
+    .modal.active{ display:flex; }
+    .modal-content{
+      position: relative;
+      max-width: 90vw; max-height: 90vh;
+      border-radius: 14px;
+      overflow: hidden;
+      border:1px solid var(--border);
+      box-shadow: 0 20px 60px rgba(0,0,0,.5);
+      background: #000;
+    }
+    .modal-content img{
+      display:block;
+      width: 100%; height: 100%;
+      object-fit: contain;
+    }
+    .modal-close{
+      position:absolute; top:8px; right:10px;
+      background: rgba(0,0,0,.5);
+      color:#fff; border:none; cursor:pointer;
+      font-size:18px; line-height:1; padding:6px 10px; border-radius:10px;
+    }
+
+    footer{
+      margin-top:18px; text-align:center; color:var(--muted); font-size:12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <section class="hero">
+      <img src="images/icon128.png" class="logo" alt="NarrowX Logo" />
+      <div class="brand">
+        <h1 class="title">NarrowX</h1>
+        <p class="tagline">The Ultimate JS Endpoint Hunter</p>
+      </div>
+      <div class="version-badge" title="Extension Version">
+        <span class="version-dot"></span>
+        Version: <span id="version">—</span>
+      </div>
+    </section>
+
+    <section class="grid">
+      <div class="card">
+        <h2>Highlights</h2>
+        <p class="muted">Engineered for accuracy, stability, and maximum endpoint coverage.</p>
+        <ul class="features">
+          <li class="feature">
+            <span class="icon">🧠</span>
+            <div class="text">Smart endpoint extraction from <code>inline</code> scripts and external <code>.js</code> files (CSP/CORS-safe via Background fetch)</div>
+          </li>
+          <li class="feature">
+            <span class="icon">📡</span>
+            <div class="text">Network capture via <code>webRequest</code> to collect Query and Body parameter keys</div>
+          </li>
+          <li class="feature">
+            <span class="icon">⚙️</span>
+            <div class="text">Supports HTTP methods: <code>GET</code>, <code>POST</code>, <code>PUT</code>, <code>PATCH</code>, <code>DELETE</code></div>
+          </li>
+          <li class="feature">
+            <span class="icon">🧭</span>
+            <div class="text">Scope filtering with wildcard <code>*</code> across domains/subdomains</div>
+          </li>
+          <li class="feature">
+            <span class="icon">🤖</span>
+            <div class="text">Auto Extract: auto-scroll, safe clicks (no new tabs), wait-for-idle, then multi-source parsing</div>
+          </li>
+          <li class="feature">
+            <span class="icon">🧾</span>
+            <div class="text">Live updates in Popup and export findings as JSON</div>
+          </li>
+        </ul>
+        <div class="badges">
+          <span class="badge">CSP Safe</span>
+          <span class="badge">Scoped</span>
+          <span class="badge">Progress UI</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>How Auto Extract Works</h2>
+        <ol class="steps">
+          <li>Auto-scroll the page to trigger lazy-loaded assets</li>
+          <li>Enable navigation guard to block <span class="kbd">window.open</span> and unwanted navigations</li>
+          <li>Perform safe synthetic clicks on selected elements (no new tabs)</li>
+          <li>Wait until the network becomes <em>idle</em></li>
+          <li>Mine endpoints from <code>performance entries</code> and monitored XHR/Fetch</li>
+          <li>Parse inline scripts and external JS via background (CSP/CORS-safe)</li>
+          <li>Scan attributes (<code>href</code>, <code>src</code>, <code>action</code>)</li>
+          <li>Apply Scope filter + exclude non-API resources (css/img/...)</li>
+        </ol>
+      </div>
+    </section>
+
+    <section class="author">
+      <img
+        id="authorPic"
+        class="author-pic"
+        src="images/author@1x.jpg"
+        srcset="images/author@1x.jpg 1x, images/author@2x.jpg 2x, images/author@3x.jpg 3x"
+        width="128"
+        height="128"
+        loading="lazy"
+        decoding="async"
+        alt="Ali Firoozi portrait"
+        data-full="images/author@3x.jpg"
+      />
+      <div>
+        <h3>Ali Firoozi</h3>
+        <p class="role">Bug Hunter • Security Engineer</p>
+        <div class="links">
+           <a href="https://github.com/afssec" target="_blank" rel="noopener noreferrer">GitHub</a>
+           <a href="https://www.linkedin.com/in/ali-firoozi-sec" target="_blank" rel="noopener noreferrer">Linkedin</a>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      © <span id="year"></span> NarrowX — All rights reserved.
+    </footer>
+  </div>
+
+  <script src="about.js"></script>
+</body>
+</html>

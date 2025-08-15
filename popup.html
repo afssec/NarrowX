@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>NarrowX</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap');
+
+    body {
+      font-family: 'Orbitron', sans-serif;
+      padding: 10px;
+      width: 400px;
+      background: linear-gradient(to bottom right, #0d0d0d, #1c1c1c);
+      margin: 0;
+      color: #e0e0e0;
+    }
+
+    .logo-wrapper {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .logo-wrapper img {
+      width: 64px;
+      height: 64px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+    }
+
+    h3 {
+      color: #FFD700;
+      text-align: center;
+      font-size: 24px;
+      margin-bottom: 5px;
+    }
+
+    .logo-text {
+      text-align: center;
+      font-size: 14px;
+      margin-bottom: 15px;
+      color: #C0C0C0;
+    }
+
+    .button-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: space-between;
+    }
+
+    button {
+      padding: 10px;
+      cursor: pointer;
+      background: linear-gradient(to right, #222, #444);
+      color: #fff;
+      border: 1px solid #555;
+      border-radius: 6px;
+      transition: all 0.3s ease;
+      flex: 1 1 45%;
+      font-size: 12px;
+    }
+
+    button:hover {
+      background: linear-gradient(to right, #FFD700, #C0C0C0);
+      color: #111;
+    }
+
+    ul {
+      max-height: 250px;
+      overflow-y: auto;
+      list-style: none;
+      padding: 0;
+      margin-top: 15px;
+    }
+
+    h4 {
+      margin: 15px 0 8px;
+      color: #FFD700;
+      font-size: 14px;
+    }
+
+    li {
+      word-break: break-all;
+      margin: 5px 0;
+      padding: 6px;
+      background: #1a1a1a;
+      border-left: 3px solid #FFD700;
+      border-radius: 3px;
+      font-size: 13px;
+    }
+
+    .category-count {
+      font-size: 0.8em;
+      color: #999;
+    }
+
+    .message {
+      color: #C0C0C0;
+      text-align: center;
+      margin: 10px 0;
+    }
+
+    .scopes-section {
+      margin-top: 20px;
+      border-top: 1px solid #333;
+      padding-top: 10px;
+    }
+
+    .add-scope {
+      display: flex;
+      margin-bottom: 10px;
+    }
+
+    .add-scope input {
+      flex: 1;
+      padding: 8px;
+      border: 1px solid #555;
+      border-radius: 5px 0 0 5px;
+      background: #111;
+      color: #ddd;
+    }
+
+    .add-scope button {
+      border-radius: 0 5px 5px 0;
+      margin: 0;
+      font-size: 12px;
+    }
+
+    .scope-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 5px;
+      background: #111;
+      border: 1px solid #333;
+      border-radius: 3px;
+      margin-bottom: 5px;
+    }
+
+    .scope-item span {
+      flex: 1;
+      word-break: break-all;
+      color: #eee;
+    }
+
+    .scope-item button {
+      padding: 5px 8px;
+      margin-left: 5px;
+      font-size: 10px;
+    }
+
+    .scope-item button.edit {
+      background: #ffc107;
+    }
+
+    .scope-item button.edit:hover {
+      background: #e0a800;
+    }
+
+    .scope-item button.delete {
+      background: #dc3545;
+    }
+
+    .scope-item button.delete:hover {
+      background: #c82333;
+    }
+
+    .scope-item input {
+      flex: 1;
+      padding: 5px;
+      border: 1px solid #444;
+      border-radius: 3px;
+      background: #222;
+      color: #eee;
+    }
+
+    .scope-toggle {
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+    }
+
+    .scope-toggle input {
+      margin-right: 10px;
+    }
+
+    .scope-toggle label {
+      font-weight: bold;
+      color: #bbb;
+    }
+   button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  .progress-wrap {
+    position: relative;
+    height: 10px;
+    background: #0f0f0f;
+    border: 1px solid #333;
+    border-radius: 6px;
+    overflow: hidden;
+    margin: 12px 0;
+    box-shadow: inset 0 0 6px rgba(0,0,0,0.5);
+  }
+  .progress-bar {
+    width: 0%;
+    height: 100%;
+    background: linear-gradient(90deg, #FFD700, #C0C0C0);
+    box-shadow: 0 0 10px rgba(255,215,0,0.4);
+    transition: width .25s ease;
+  }
+  .progress-text {
+    margin-top: 6px;
+    font-size: 12px;
+    color: #C0C0C0;
+    text-align: right;
+  }
+</style>
+</head>
+<body>
+  <div class="logo-wrapper">
+    <img src="images/icon128.png" alt="NarrowX Logo">
+  </div>
+
+  <h3>NarrowX</h3>
+  <div class="logo-text">The Ultimate JS Endpoint Hunter</div>
+
+  <div class="button-container">
+    <button id="toggleBtn">Turn On</button>
+    <button id="downloadBtn">Download Findings</button>
+    <button id="autoExtractBtn">Auto Extract</button>
+    <button id="resetBtn">Reset</button>
+    <button id="aboutBtn">About</button>
+  </div>
+
+  <div id="message" class="message"></div>
+  <ul id="endpointList"></ul>
+
+  <div class="scopes-section">
+    <h4>Scopes (e.g., https://*.site.com)</h4>
+    <div class="scope-toggle">
+      <input type="checkbox" id="scopeEnabledCheckbox">
+      <label for="scopeEnabledCheckbox">Enable Scope Filtering</label>
+    </div>
+      <div id="message" class="message"></div>
+
+  <div id="progressSection" style="display:none;">
+    <div class="progress-wrap">
+      <div class="progress-bar" id="progressBar"></div>
+    </div>
+    <div class="progress-text" id="progressText">0% • Initializing...</div>
+  </div>
+
+  <ul id="endpointList"></ul>
+    <div class="add-scope">
+      <input type="text" id="newScopeInput" placeholder="Add new scope...">
+      <button id="addScopeBtn">Add</button>
+    </div>
+    <ul id="scopesList"></ul>
+  </div>
+
+
+  <script src="popup.js"></script>
+</body>
+</html>
