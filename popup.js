@@ -37,7 +37,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!progressSection) return;
     progressSection.style.display = "block";
     progressBar.style.width = Math.max(0, Math.min(100, pct)) + "%";
-    progressText.textContent = `${Math.floor(pct)}% • ${status || ""}`;
+    progressText.textContent = `${Math.floor(pct)}% \u2022 ${status || ""}`;
   }
 
   function hideProgress() {
