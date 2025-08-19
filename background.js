@@ -184,6 +184,151 @@ async function safeFetchText(url, timeoutMs = 15000) {
   }
 }
 
+function navGuardInjection(mode) {
+  try {
+    (function() {
+      const w = window;
+      if (w.__NarrowX_NavGuard) return;
+
+      function log(msg) { try { console.debug('[NarrowX] NavGuard:', msg); } catch {} }
+
+      const guard = {
+        active: false,
+        undo: [],
+
+        _replace(obj, key, make) {
+          try {
+            const orig = obj[key];
+            const wrapped = make(orig);
+            obj[key] = wrapped;
+            this.undo.push(() => { try { obj[key] = orig; } catch {} });
+            return true;
+          } catch { return false; }
+        },
+
+        _define(obj, prop, descFactory) {
+          try {
+            const origDesc = Object.getOwnPropertyDescriptor(obj, prop);
+            const newDesc = descFactory(origDesc || {});
+            if (!newDesc) return false;
+            Object.defineProperty(obj, prop, newDesc);
+            this.undo.push(() => {
+              try {
+                if (origDesc) Object.defineProperty(obj, prop, origDesc);
+              } catch {}
+            });
+            return true;
+          } catch { return false; }
+        },
+
+        _on(target, type, handler, opts) {
+          try {
+            target.addEventListener(type, handler, opts);
+            this.undo.push(() => { try { target.removeEventListener(type, handler, opts); } catch {} });
+            return true;
+          } catch { return false; }
+        },
+
+        enable() {
+          if (this.active) return;
+          this.active = true;
+
+          this._replace(w, 'open', () => function() { log('window.open blocked'); return null; });
+
+          try {
+            const LP = w.Location && w.Location.prototype;
+            if (LP) {
+              this._replace(LP, 'assign', () => function() { log('location.assign blocked'); });
+              this._replace(LP, 'replace', () => function() { log('location.replace blocked'); });
+              this._replace(LP, 'reload', () => function() { log('location.reload blocked'); });
+              const hrefDesc = Object.getOwnPropertyDescriptor(LP, 'href');
+              if (hrefDesc && (hrefDesc.set || hrefDesc.get)) {
+                this._define(LP, 'href', (orig) => ({
+                  configurable: true,
+                  enumerable: orig.enumerable === true,
+                  get: orig.get ? function() { return orig.get.call(this); } : function() { try { return String(this); } catch { return ''; } },
+                  set: function(_) { log('location.href blocked'); }
+                }));
+              }
+            }
+          } catch {}
+
+          try {
+            const WP = w.Window && w.Window.prototype;
+            if (WP) {
+              this._define(WP, 'location', (orig) => {
+                if (!orig || (!orig.get && !orig.set)) return null;
+                return {
+                  configurable: true,
+                  enumerable: orig.enumerable === true,
+                  get: function() { return orig.get ? orig.get.call(this) : w.location; },
+                  set: function(_) { log('window.location set blocked'); }
+                };
+              });
+            }
+          } catch {}
+          try {
+            const DP = w.Document && w.Document.prototype;
+            if (DP) {
+              this._define(DP, 'location', (orig) => {
+                if (!orig || (!orig.get && !orig.set)) return null;
+                return {
+                  configurable: true,
+                  enumerable: orig.enumerable === true,
+                  get: function() { return orig.get ? orig.get.call(this) : w.document.location; },
+                  set: function(_) { log('document.location set blocked'); }
+                };
+              });
+            }
+          } catch {}
+          try {
+            const HP = w.History && w.History.prototype;
+            if (HP) {
+              this._replace(HP, 'go', () => function() { log('history.go blocked'); });
+              this._replace(HP, 'back', () => function() { log('history.back blocked'); });
+              this._replace(HP, 'forward', () => function() { log('history.forward blocked'); });
+              this._replace(HP, 'pushState', () => function() { log('history.pushState blocked'); });
+              this._replace(HP, 'replaceState', () => function() { log('history.replaceState blocked'); });
+            }
+          } catch {}
+
+          const clickPreventer = (e) => { try {
+            if (!e.isTrusted) {
+              const t = e.target && e.target.tagName;
+              if (t === 'A' || t === 'AREA') e.preventDefault();
+            }
+          } catch {} };
+          this._on(w.document, 'click', clickPreventer, true);
+
+          const submitPreventer = (e) => { try { if (!e.isTrusted) e.preventDefault(); } catch {} };
+          this._on(w.document, 'submit', submitPreventer, true);
+
+          const beforeUnload = (e) => { try { e.preventDefault(); e.returnValue = ''; } catch {} };
+          this._on(w, 'beforeunload', beforeUnload);
+
+          log('enabled');
+        },
+
+        disable() {
+          if (!this.active) return;
+          this.active = false;
+          this.undo.reverse().forEach(fn => { try { fn(); } catch {} });
+          this.undo.length = 0;
+          log('disabled');
+        }
+      };
+
+      w.__NarrowX_NavGuard = guard;
+    })();
+
+    if (mode === 'enable') {
+      window.__NarrowX_NavGuard && window.__NarrowX_NavGuard.enable();
+    } else if (mode === 'disable') {
+      window.__NarrowX_NavGuard && window.__NarrowX_NavGuard.disable();
+    }
+  } catch {}
+}
+
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   if (msg && msg.action === 'nx:hello') {
     const tabId = sender.tab && sender.tab.id;
@@ -207,46 +352,68 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     return true;
   }
 
+  if (msg && msg.action === 'enableNavGuard') {
+    const tabId = sender.tab && sender.tab.id;
+    if (!tabId) return sendResponse({ ok: false });
+    chrome.scripting.executeScript({
+      target: { tabId, allFrames: true },
+      world: 'MAIN',
+      func: navGuardInjection,
+      args: ['enable']
+    }, () => {
+      if (chrome.runtime.lastError) {
+        sendResponse({ ok: false, error: chrome.runtime.lastError.message });
+      } else {
+        sendResponse({ ok: true });
+      }
+    });
+    return true;
+  }
+
+  if (msg && msg.action === 'disableNavGuard') {
+    const tabId = sender.tab && sender.tab.id;
+    if (!tabId) return sendResponse({ ok: false });
+    chrome.scripting.executeScript({
+      target: { tabId, allFrames: true },
+      world: 'MAIN',
+      func: navGuardInjection,
+      args: ['disable']
+    }, () => {
+      if (chrome.runtime.lastError) {
+        sendResponse({ ok: false, error: chrome.runtime.lastError.message });
+      } else {
+        sendResponse({ ok: true });
+      }
+    });
+    return true;
+  }
+
   if (msg && msg.action === 'activateNoNavGuard') {
     const tabId = sender.tab && sender.tab.id;
     if (!tabId) {
       sendResponse({ ok: false });
       return;
     }
-    const duration = Math.min(Math.max(msg.durationMs || 4000, 500), 15000);
+    const duration = Math.min(Math.max(msg.durationMs || 4000, 500), 60000);
     chrome.scripting.executeScript({
       target: { tabId, allFrames: true },
       world: 'MAIN',
-      func: (d) => {
-        try {
-          if (window.__NarrowX_NoNavGuardActive) return;
-          window.__NarrowX_NoNavGuardActive = true;
-          const origOpen = window.open;
-          window.open = function() {
-            try { console.debug('[NarrowX] blocked window.open'); } catch {}
-            return null;
-          };
-          const clickBlocker = function(e) {
-            if (e && e.isTrusted === false) {
-              try { e.preventDefault(); } catch {}
-            }
-          };
-          document.addEventListener('click', clickBlocker, true);
-
-          setTimeout(() => {
-            try {
-              document.removeEventListener('click', clickBlocker, true);
-              window.open = origOpen;
-              delete window.__NarrowX_NoNavGuardActive;
-            } catch {}
-          }, d);
-        } catch {}
-      },
-      args: [duration]
+      func: navGuardInjection,
+      args: ['enable']
     }, () => {
       if (chrome.runtime.lastError) {
         sendResponse({ ok: false, error: chrome.runtime.lastError.message });
       } else {
+        setTimeout(() => {
+          try {
+            chrome.scripting.executeScript({
+              target: { tabId, allFrames: true },
+              world: 'MAIN',
+              func: navGuardInjection,
+              args: ['disable']
+            });
+          } catch {}
+        }, duration);
         sendResponse({ ok: true });
       }
     });
