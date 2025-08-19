@@ -87,7 +87,7 @@ function extractFindingsFromText(text) {
     findings.apiKeys.add(apiMatch[0]);
   }
 
-  const dbUrlRegex = /(redis|sqlite|mysql|postgres|postgresql|sqlserver|oraclemongodb):\/\/[a-zA-Z0-9_\-:.]+(?::[a-zA-Z0-9_\-:.]+)?(@|%40)[a-zA-Z0-9_\-:.]+(?::\d+)?\/[a-zA-Z0-9_\-]+/gi;
+  const dbUrlRegex = /(redis|sqlite|mysql|postgres|postgresql|sqlserver|oracle|mongodb):\/\/[a-zA-Z0-9_\-:.]+(?::[a-zA-Z0-9_\-:.]+)?(@|%40)[a-zA-Z0-9_\-:.]+(?::\d+)?\/[a-zA-Z0-9_\-]+/gi;
   let dbMatch;
   while ((dbMatch = dbUrlRegex.exec(text)) !== null) {
     findings.databaseUrls.add(dbMatch[0]);
@@ -135,13 +135,19 @@ function reportProgress(percent, status) {
   } catch {}
 }
 
-async function activateNoNavGuard(durationMs = 4000) {
+async function enableNavGuard() {
   return new Promise(resolve => {
     try {
-      chrome.runtime.sendMessage({ action: 'activateNoNavGuard', durationMs }, () => resolve());
-    } catch {
-      resolve();
-    }
+      chrome.runtime.sendMessage({ action: 'enableNavGuard' }, () => resolve());
+    } catch { resolve(); }
+  });
+}
+
+async function disableNavGuard() {
+  return new Promise(resolve => {
+    try {
+      chrome.runtime.sendMessage({ action: 'disableNavGuard' }, () => resolve());
+    } catch { resolve(); }
   });
 }
 
@@ -164,7 +170,7 @@ function startExtraction() {
     const scriptUrls = scripts
       .map(s => s.src)
       .filter(Boolean)
-      .filter(src => src.endsWith(".js"))
+      .filter(src => /\.(m?js)(?:$|\?)/i.test(src || ""))
       .filter(src => matchesScope(src, scopes, scopeEnabled))
       .map(src => {
         try { return new URL(src, location.href).toString(); } catch { return null; }
@@ -213,6 +219,8 @@ async function autoExtractEndpoints() {
   try {
     reportProgress(2, "Initializing");
 
+    await enableNavGuard();
+
     await new Promise(resolve => {
       let y = 0;
       const dist = 200;
@@ -231,7 +239,6 @@ async function autoExtractEndpoints() {
     });
     reportProgress(12, "Scrolling page");
 
-    await activateNoNavGuard(5000);
     reportProgress(17, "Preparing safe clicks");
 
     const clickable = Array.from(document.querySelectorAll('button, [role="button"], a, [onclick], [data-action]')).slice(0, 60);
@@ -299,12 +306,12 @@ async function autoExtractEndpoints() {
     const scriptSrcs = new Set();
     document.querySelectorAll('script[src]').forEach(s => {
       const src = s.src || '';
-      if ((src.startsWith('/') || src.startsWith('http')) && src.endsWith('.js')) {
+      if ((src.startsWith('/') || src.startsWith('http')) && /\.(m?js)(?:$|\?)/i.test(src)) {
         scriptSrcs.add(src.startsWith('http') ? src : baseUrl + src);
       }
     });
     performance.getEntriesByType('resource').forEach(entry => {
-      if (entry.name.endsWith('.js')) {
+      if (/\.(m?js)(?:$|\?)/i.test(entry.name)) {
         scriptSrcs.add(entry.name);
       }
     });
@@ -381,6 +388,8 @@ async function autoExtractEndpoints() {
     logError("Auto extraction failed", e);
     reportProgress(100, "Done (with errors)");
     return 0;
+  } finally {
+    try { await disableNavGuard(); } catch {}
   }
 }
 
